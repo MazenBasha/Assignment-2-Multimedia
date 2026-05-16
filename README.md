@@ -69,6 +69,17 @@ clones from GitHub, runs on a free T4, and writes everything back to
 `outputs/`. The Kaggle web UI is only touched once at setup (to attach
 the `HF_TOKEN` and `ANTHROPIC_API_KEY` secrets — see `kaggle/README.md`).
 
+**Local on a laptop without a big GPU** (`configs/local.yaml` or `configs/local_stub.yaml`):
+the project also includes a substitute stack — Indiana Open-i (public,
+no Kaggle), CLIP for retrieval (no auth), Moondream2 or a stub for
+generation (no auth), rule-based VQA construction (no API key). Not the
+assignment deliverable, but the architecture, prompts, metrics, and
+split logic are identical. Run with:
+```bash
+bash scripts/run_local.sh                      # CLIP + Moondream2 on CPU
+CFG=configs/local_stub.yaml bash scripts/run_local.sh   # CLIP + stub (no model download)
+```
+
 **Local with a GPU (24 GB+):**
 
 

@@ -1,0 +1,64 @@
+{
+  "rag": {
+    "n": 53,
+    "exact_match": 0.6415094339622641,
+    "token_f1": 0.6937236480591689,
+    "presence_yesno_accuracy": 0.825,
+    "per_question_type": {
+      "description": {
+        "n": 11,
+        "exact_match": 0.0,
+        "token_f1": 0.2515775770123596
+      },
+      "location": {
+        "n": 1,
+        "exact_match": 0.0,
+        "token_f1": 0.0
+      },
+      "presence": {
+        "n": 40,
+        "exact_match": 0.825,
+        "token_f1": 0.825
+      },
+      "severity": {
+        "n": 1,
+        "exact_match": 1.0,
+        "token_f1": 1.0
+      }
+    }
+  },
+  "baseline": {
+    "n": 53,
+    "exact_match": 0.6037735849056604,
+    "token_f1": 0.6386256011838697,
+    "presence_yesno_accuracy": 0.8,
+    "per_question_type": {
+      "description": {
+        "n": 11,
+        "exact_match": 0.0,
+        "token_f1": 0.16792335115864526
+      },
+      "location": {
+        "n": 1,
+        "exact_match": 0.0,
+        "token_f1": 0.0
+      },
+      "presence": {
+        "n": 40,
+        "exact_match": 0.8,
+        "token_f1": 0.8
+      },
+      "severity": {
+        "n": 1,
+        "exact_match": 0.0,
+        "token_f1": 0.0
+      }
+    }
+  },
+  "delta_rag_minus_baseline": {
+    "n": 0,
+    "exact_match": 0.037735849056603765,
+    "token_f1": 0.05509804687529918,
+    "presence_yesno_accuracy": 0.02499999999999991
+  }
+}

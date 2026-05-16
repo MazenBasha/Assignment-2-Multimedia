@@ -82,9 +82,41 @@ Copy the numbers into `report/outline.md` → render the PDF.
 - `e5fdb96` — Initial commit (full codebase)
 - `9957fed` — Add `preprocess_kaggle.py` for the Kaggle MIMIC mirror schema + config fix
 - `bae382b` — Add `scripts/run_on_kaggle.py` for headless VSCode workflow
-- `<this commit>` — Notebook rewrite (clean cells, idempotent, soft-fail VQA, output staging) + STATUS.md
+- `8968e1c` — Notebook rewrite (clean cells, idempotent, soft-fail VQA, output staging) + STATUS.md
+- `a240897` — Local-CPU stack: CLIP + Moondream2 + Open-i + rule-based VQA (no Kaggle/HF/Anthropic needed)
+- `e688d48` — Stub nearest-neighbour generator + smoke configs + resumable HTTP downloads
 
 Repo is at `https://github.com/MazenBasha/Assignment-2-Multimedia`.
+
+## Local run in progress (E:\Assignment 2 Multimedia\)
+
+You said you'd rather work in VSCode than on Kaggle. To make that feasible
+without your GPU/credentials, I added a second, parallel pipeline that
+runs entirely on this laptop with **no Kaggle / HF / Anthropic auth**:
+
+| Component       | Brief stack (waiting on you) | Local stack (running) |
+|-----------------|------------------------------|-----------------------|
+| Dataset         | MIMIC-CXR (Kaggle)           | **Indiana Open-i** (NLM, public) |
+| Retriever       | ColPali v1.3 (MaxSim)        | **CLIP-ViT-B/32** (cosine) |
+| Generator       | MedGemma-1.5-4b-it (gated)   | **Moondream2** (Apache 2.0) or **stub** |
+| VQA builder     | Claude Haiku                 | **Rule-based**, no API |
+
+Configs:
+* `configs/local.yaml`        - CLIP + Moondream2 (200 images, 10 test, ~1 h on CPU)
+* `configs/local_stub.yaml`   - CLIP + stub generator (no Moondream2 download)
+* `configs/local_smoke.yaml`  - Tiny (40 images, 3 test) for fast iteration
+
+Run with:
+```
+bash scripts/run_local.sh
+# or:
+CFG=configs/local_stub.yaml bash scripts/run_local.sh
+```
+
+This is **not the assignment deliverable** — it's a hardware-fallback so
+you can demo locally + iterate on the codebase in VSCode while the
+real Kaggle run waits for your kaggle.json + HF_TOKEN.
+
 
 ## What I'd suggest as the very first thing you do
 

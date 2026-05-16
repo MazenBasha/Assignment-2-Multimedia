@@ -50,9 +50,9 @@ def split_by_patient(
     test_path  = splits_dir / "test.parquet"
     train_df.to_parquet(train_path, index=False)
     test_df.to_parquet(test_path,  index=False)
-    log.info("Train: %d rows (%d patients) → %s",
+    log.info("Train: %d rows (%d patients) ->%s",
              len(train_df), train_df["subject_id"].nunique(), train_path)
-    log.info("Test : %d rows (%d patients) → %s",
+    log.info("Test : %d rows (%d patients) ->%s",
              len(test_df),  test_df["subject_id"].nunique(),  test_path)
 
     overlap = set(train_df["subject_id"]) & set(test_df["subject_id"])
