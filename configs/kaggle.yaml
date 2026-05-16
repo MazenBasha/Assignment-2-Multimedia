@@ -1,0 +1,66 @@
+# Kaggle Notebook free-tier (T4 16 GB) profile.
+# Smaller caps than the default so the full pipeline fits in the 9-hour
+# session limit and the 16 GB GPU.
+
+paths:
+  data_root:      /kaggle/input/mimic-cxr-dataset
+  images_dir:     /kaggle/working/data/images          # symlinked to /kaggle/input
+  reports_csv:    /kaggle/working/data/reports.csv
+  splits_dir:     /kaggle/working/data/splits
+  artifacts_dir:  /kaggle/working/artifacts
+  vqa_dataset:    /kaggle/working/data/vqa/mimic_vqa.parquet
+  outputs_dir:    /kaggle/working/outputs
+
+dataset:
+  test_fraction:           0.05
+  seed:                    42
+  max_train_corpus:        2000     # T4 ColPali index: ~2 ms/img × 2000 ≈ a few min
+  max_test_examples:       50       # full Mode A pass in ~10–15 min
+  image_short_side:        448
+
+models:
+  colpali:        vidore/colpali-v1.3
+  medgemma:       google/medgemma-1.5-4b-it
+  chexbert:       StanfordAIMI/CheXbert
+  bertscore:      microsoft/deberta-large-mnli      # smaller than xlarge to fit on T4
+
+vqa_generation:
+  judge_provider: anthropic
+  judge_model:    claude-haiku-4-5-20251001         # cheap + fast for dataset construction
+  n_pairs_per_report: 3
+  n_reports_to_use:   500
+  human_review_frac:  0.02
+
+retrieval:
+  top_k:           4
+  batch_size:      4
+  use_4bit:        true
+  index_chunk:     512
+
+generation:
+  device:           cuda
+  use_4bit:         true
+  max_new_tokens:
+    report:         300
+    vqa:            48
+  temperature:      0.2
+  do_sample:        false
+  num_beams:        1
+
+eval:
+  bleu_n:          [1, 2, 3, 4]
+  chexpert_labels:
+    - "Atelectasis"
+    - "Cardiomegaly"
+    - "Consolidation"
+    - "Edema"
+    - "Enlarged Cardiomediastinum"
+    - "Fracture"
+    - "Lung Lesion"
+    - "Lung Opacity"
+    - "No Finding"
+    - "Pleural Effusion"
+    - "Pleural Other"
+    - "Pneumonia"
+    - "Pneumothorax"
+    - "Support Devices"

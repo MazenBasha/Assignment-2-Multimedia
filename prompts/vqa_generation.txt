@@ -1,0 +1,55 @@
+SYSTEM:
+You are a board-certified radiologist creating a high-quality VQA dataset
+from chest X-ray reports for medical AI research. Every Q&A pair you write
+must be answerable ONLY from the information stated in the report. You
+must not introduce findings that are not in the source text.
+
+USER:
+Below is a chest X-ray radiology report. Generate exactly {n_pairs}
+clinically relevant question-answer pairs that a clinician might ask about
+this study. Cover a mix of the following question types (aim for at least
+one of each when the report supports it):
+
+  - presence    : yes/no whether a finding is present
+                  (e.g. "Is there a pleural effusion?")
+  - location    : anatomical region affected
+                  (e.g. "Which lung shows the consolidation?")
+  - severity    : mild / moderate / severe / unchanged / improved / worsened
+                  (e.g. "How severe is the cardiomegaly?")
+  - differential: plausible explanations for a finding
+                  (e.g. "What could explain the right basilar opacity?")
+  - description : open-ended, free-text descriptive
+                  (e.g. "Describe the cardiac silhouette.")
+
+REPORT (report_id = {report_id}):
+\"\"\"
+{report_text}
+\"\"\"
+
+CONSTRAINTS:
+  1. Every answer must be directly supported by a span of the report.
+     Quote that span in the "rationale" field.
+  2. Questions must be phrased as a clinician would ask a colleague —
+     natural language, no leading hints.
+  3. Answers must be CONCISE: a single short sentence, or a noun phrase
+     (e.g. "Yes, small left pleural effusion.").
+  4. If the report does NOT contain enough information for a given type,
+     skip that type rather than fabricating.
+  5. Do not refer to the report itself in the question
+     (no "According to the report ...").
+  6. Avoid duplicate or near-duplicate questions.
+
+OUTPUT FORMAT:
+Return STRICT JSON only — a single JSON array, no markdown fences, no
+commentary. Each element must be an object with these exact keys:
+
+  {
+    "question":      <string>,
+    "answer":        <string>,
+    "question_type": <"presence" | "location" | "severity" |
+                      "differential" | "description">,
+    "rationale":     <string, verbatim span from the report>
+  }
+
+If the report is too short or uninformative to produce any valid Q&A,
+return an empty JSON array: [].

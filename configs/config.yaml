@@ -1,0 +1,64 @@
+# Default configuration. Override fields on the CLI with `--cfg key=value`.
+
+paths:
+  data_root:      data/mimic-cxr            # where Kaggle dataset is unpacked
+  images_dir:     data/mimic-cxr/images     # flat dir of *.jpg after preprocess
+  reports_csv:    data/mimic-cxr/reports.csv  # columns: study_id, subject_id, text, ...
+  splits_dir:     data/splits               # train/test parquet files
+  artifacts_dir:  artifacts                 # ColPali index, embeddings, results
+  vqa_dataset:    data/vqa/mimic_vqa.parquet
+  outputs_dir:    outputs                   # generated reports + per-run logs
+
+dataset:
+  test_fraction:           0.05             # patient-level held-out
+  seed:                    42
+  max_train_corpus:        20000            # cap retrieval corpus for compute
+  max_test_examples:       300              # cap eval set for compute
+  image_short_side:        512              # resize for ColPali / MedGemma input
+
+models:
+  colpali:        vidore/colpali-v1.3
+  medgemma:       google/medgemma-1.5-4b-it
+  chexbert:       StanfordAIMI/CheXbert        # used by eval/chexbert_eval.py
+  bertscore:      microsoft/deberta-xlarge-mnli
+
+vqa_generation:
+  judge_provider: anthropic                  # anthropic | openai | local
+  judge_model:    claude-opus-4-7
+  n_pairs_per_report: 4
+  n_reports_to_use:   2000                   # cap by cost; over-sample types
+  human_review_frac:  0.02                   # 2 % spot-check
+
+retrieval:
+  top_k:           5
+  batch_size:      8
+  use_4bit:        false
+  index_chunk:     1024                      # embeddings per shard
+
+generation:
+  device:           cuda
+  use_4bit:         true
+  max_new_tokens:
+    report:         350
+    vqa:            64
+  temperature:      0.2
+  do_sample:        false
+  num_beams:        1
+
+eval:
+  bleu_n:          [1, 2, 3, 4]
+  chexpert_labels:
+    - "Atelectasis"
+    - "Cardiomegaly"
+    - "Consolidation"
+    - "Edema"
+    - "Enlarged Cardiomediastinum"
+    - "Fracture"
+    - "Lung Lesion"
+    - "Lung Opacity"
+    - "No Finding"
+    - "Pleural Effusion"
+    - "Pleural Other"
+    - "Pneumonia"
+    - "Pneumothorax"
+    - "Support Devices"

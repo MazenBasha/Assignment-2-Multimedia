@@ -1,0 +1,61 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# --- Data, models, caches (MIMIC-CXR is PHI: never commit) ---
+data/
+!data/.gitkeep
+artifacts/
+checkpoints/
+*.parquet
+*.feather
+*.npy
+*.npz
+*.pt
+*.bin
+*.safetensors
+
+# Hugging Face / Kaggle caches if they land in-repo
+.cache/
+.kaggle/
+
+# --- Outputs / runs ---
+runs/
+outputs/
+logs/
+wandb/
+
+# --- Secrets ---
+.env
+*.env
+kaggle.json
+hf_token*
+.anthropic*
+.openai*
+
+# --- OS / IDE ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/
+.pytest_cache/
+
+# --- Notebook outputs (we strip before commit) ---
+notebooks/**/*-output.ipynb
+
+# --- Reports build artifacts ---
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.bbl
+report/*.blg
+
+# Keep the empty folder placeholders
+!**/.gitkeep

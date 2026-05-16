@@ -1,0 +1,49 @@
+# Core ML
+torch==2.4.0
+torchvision==0.19.0
+transformers==4.45.2
+accelerate==0.34.2
+bitsandbytes==0.43.3 ; platform_system != "Darwin"
+sentencepiece==0.2.0
+safetensors==0.4.5
+
+# ColPali multi-vector retrieval
+colpali-engine==0.3.4
+peft==0.13.0
+einops==0.8.0
+
+# MedGemma uses the standard HF chat-template path — no extra deps
+
+# Data + image
+pandas==2.2.3
+pyarrow==17.0.0
+numpy==1.26.4
+Pillow==10.4.0
+pydicom==3.0.1            # MIMIC-CXR original files are DICOM; harmless if you only use JPG
+opencv-python-headless==4.10.0.84
+tqdm==4.66.5
+pyyaml==6.0.2
+python-dotenv==1.0.1
+
+# Kaggle download
+kaggle==1.6.17
+
+# Metrics (Mode A)
+nltk==3.9.1               # BLEU, METEOR
+rouge-score==0.1.2        # ROUGE-L
+bert-score==0.3.13        # BERTScore
+sacrebleu==2.4.3          # corpus-BLEU sanity check
+
+# Clinical labeller (CheXbert) and helpers
+scikit-learn==1.5.2
+
+# Optional but recommended: a fast HTTP client for the LLM judge that
+# builds the VQA dataset (Anthropic / OpenAI / local server)
+httpx==0.27.2
+anthropic==0.39.0
+openai==1.54.4
+
+# Notebooks
+jupyterlab==4.2.5
+matplotlib==3.9.2
+seaborn==0.13.2
