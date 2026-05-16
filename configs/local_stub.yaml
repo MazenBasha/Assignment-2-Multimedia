@@ -1,0 +1,69 @@
+# Stub generator + CLIP retrieval. No Moondream2 download needed.
+# Useful for verifying the pipeline glue end-to-end on Open-i data, and as a
+# "copy nearest retrieved report" baseline.
+
+paths:
+  data_root:      data/openi
+  images_dir:     data/openi/images
+  reports_csv:    data/openi/reports.csv
+  splits_dir:     data/openi/splits
+  artifacts_dir:  artifacts/local_stub
+  vqa_dataset:    data/openi/vqa/openi_vqa.parquet
+  outputs_dir:    outputs
+
+dataset:
+  test_fraction:           0.1
+  seed:                    42
+  max_train_corpus:        200
+  max_test_examples:       20
+  image_short_side:        336
+
+retrieval:
+  backend:        clip
+  top_k:          3
+  batch_size:     8
+  use_4bit:       false
+  index_chunk:    64
+  clip_model:     openai/clip-vit-base-patch32
+
+generation:
+  backend:        stub
+  device:         cpu
+  use_4bit:       false
+  dtype:          float32
+  max_new_tokens:
+    report:       180
+    vqa:          48
+  temperature:    0.2
+  do_sample:      false
+  num_beams:      1
+
+vqa_generation:
+  backend:        rule_based
+  n_pairs_per_report: 3
+  n_reports_to_use:   200
+  human_review_frac:  0.0
+
+models:
+  colpali:        vidore/colpali-v1.3
+  medgemma:       google/medgemma-1.5-4b-it
+  chexbert:       StanfordAIMI/CheXbert
+  bertscore:      microsoft/deberta-large-mnli
+
+eval:
+  bleu_n:          [1, 2, 3, 4]
+  chexpert_labels:
+    - "Atelectasis"
+    - "Cardiomegaly"
+    - "Consolidation"
+    - "Edema"
+    - "Enlarged Cardiomediastinum"
+    - "Fracture"
+    - "Lung Lesion"
+    - "Lung Opacity"
+    - "No Finding"
+    - "Pleural Effusion"
+    - "Pleural Other"
+    - "Pneumonia"
+    - "Pneumothorax"
+    - "Support Devices"

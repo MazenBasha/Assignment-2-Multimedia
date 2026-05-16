@@ -33,6 +33,9 @@ def make_generator(cfg: dict):
             device     = device,
             use_4bit   = use_4bit,
         )
+    if backend == "stub":
+        from generation.stub_generator import StubGenerator
+        return StubGenerator()
     raise ValueError(f"Unknown generation.backend: {backend}")
 
 

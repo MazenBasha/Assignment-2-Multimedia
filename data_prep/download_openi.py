@@ -24,7 +24,8 @@ import tarfile
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
+from urllib.error import HTTPError
 
 import pandas as pd
 from tqdm import tqdm
@@ -38,23 +39,70 @@ PNG_ARCHIVE     = f"{OPENI_BASE}/NLMCXR_png.tgz"
 REPORTS_ARCHIVE = f"{OPENI_BASE}/NLMCXR_reports.tgz"
 
 
-def _stream_download(url: str, dest: Path, chunk: int = 1 << 20) -> None:
-    if dest.exists() and dest.stat().st_size > 1024:
-        log.info("Already downloaded: %s (%d MB)", dest, dest.stat().st_size >> 20)
-        return
+def _expected_total(url: str) -> int:
+    """HEAD-equivalent: open the URL once just to read Content-Length."""
+    with urlopen(url, timeout=30) as r:
+        return int(r.headers.get("Content-Length", 0))
+
+
+def _stream_download(url: str, dest: Path, chunk: int = 1 << 20, *, max_retries: int = 6) -> None:
+    """Resumable download via HTTP Range. Retries on transient errors."""
     dest.parent.mkdir(parents=True, exist_ok=True)
-    log.info("Downloading %s -> %s", url, dest)
-    with urlopen(url, timeout=60) as resp:
-        total = int(resp.headers.get("Content-Length", 0))
-        with dest.open("wb") as f, tqdm(
-            total=total, unit="B", unit_scale=True, desc=dest.name
-        ) as bar:
-            while True:
-                buf = resp.read(chunk)
-                if not buf:
-                    break
-                f.write(buf)
-                bar.update(len(buf))
+    expected = _expected_total(url)
+    if dest.exists() and expected > 0 and dest.stat().st_size >= expected:
+        log.info("Already complete: %s (%d MB)", dest, dest.stat().st_size >> 20)
+        return
+
+    attempt = 0
+    while True:
+        already = dest.stat().st_size if dest.exists() else 0
+        if expected > 0 and already >= expected:
+            log.info("Complete: %s", dest)
+            return
+
+        req = Request(url)
+        mode = "wb"
+        if already > 0:
+            req.add_header("Range", f"bytes={already}-")
+            mode = "ab"
+            log.info("Resuming %s at byte %d / %d", url, already, expected)
+        else:
+            log.info("Downloading %s -> %s", url, dest)
+
+        try:
+            with urlopen(req, timeout=60) as resp:
+                # Server may not honour Range -> we get 200 + full file again.
+                if resp.status == 200 and already > 0:
+                    log.info("Server didn't honour Range; starting over.")
+                    already = 0
+                    mode = "wb"
+                with dest.open(mode) as f, tqdm(
+                    total=expected, initial=already, unit="B",
+                    unit_scale=True, desc=dest.name,
+                ) as bar:
+                    while True:
+                        buf = resp.read(chunk)
+                        if not buf:
+                            break
+                        f.write(buf)
+                        bar.update(len(buf))
+            # Loop top will re-check size against expected; exit on success.
+            if expected > 0 and dest.stat().st_size >= expected:
+                return
+            # If we read all the server gave us but file is still short, retry.
+            attempt += 1
+            if attempt > max_retries:
+                raise RuntimeError(f"Download incomplete after {max_retries} retries: "
+                                   f"got {dest.stat().st_size} / {expected} bytes")
+            log.info("Short read; retrying (attempt %d/%d)", attempt, max_retries)
+        except (HTTPError, ConnectionError, TimeoutError) as e:
+            attempt += 1
+            if attempt > max_retries:
+                raise
+            wait = min(30, 2 ** attempt)
+            log.warning("Download error: %s; retrying in %ds (attempt %d/%d)",
+                        e, wait, attempt, max_retries)
+            import time as _t; _t.sleep(wait)
 
 
 def _extract(archive: Path, dest_dir: Path) -> None:
