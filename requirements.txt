@@ -48,3 +48,4 @@ jupyterlab==4.2.5
 matplotlib==3.9.2
 seaborn==0.13.2
 gradio==6.14.0
+markdown-pdf==1.5
