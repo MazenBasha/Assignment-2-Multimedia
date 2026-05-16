@@ -59,3 +59,4 @@ report/*.blg
 
 # Keep the empty folder placeholders
 !**/.gitkeep
+*.log

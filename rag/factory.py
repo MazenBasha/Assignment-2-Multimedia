@@ -33,6 +33,13 @@ def make_generator(cfg: dict):
             device     = device,
             use_4bit   = use_4bit,
         )
+    if backend == "smolvlm":
+        from generation.smolvlm_wrapper import SmolVLM
+        return SmolVLM(
+            model_name = cfg["generation"].get("smolvlm_model", "HuggingFaceTB/SmolVLM-256M-Instruct"),
+            device     = device,
+            use_4bit   = use_4bit,
+        )
     if backend == "stub":
         from generation.stub_generator import StubGenerator
         return StubGenerator()

@@ -113,6 +113,25 @@ bash scripts/run_local.sh
 CFG=configs/local_stub.yaml bash scripts/run_local.sh
 ```
 
+### Current state of the local-stack run
+
+| Step | Status |
+|---|---|
+| Open-i dataset (1.3 GB) | downloaded (corrupt tarball, but 3,955 reports + 6,302 images extracted before failure) |
+| Patient-level split | done (200 train / 20 test) |
+| Rule-based VQA (9,433 pairs) | done; trimmed to 17 balanced for SmolVLM run |
+| CLIP index over 200 training images | done (484 KB at `artifacts/local_stub/clip_index.pt`) |
+| **Stub generator run** (nearest-neighbour baseline) | **complete** -- metrics in `outputs/stub_run/`; BLEU-1 0.34 RAG vs 0.01 baseline (Mode A) |
+| **SmolVLM-256M run** | **abandoned** -- model too small, echoed the retrieved-reports list instead of generating |
+| **SmolVLM-500M run** | **in progress** -- 1 GB download, slow due to network/Xet stalls |
+| Moondream2 (3.7 GB) | **abandoned** -- network stalled at 192 MB; cleaned up |
+
+### Web demo
+
+`app.py` (Gradio) is running on http://localhost:7860 with the **stub** backend.
+After SmolVLM-500M finishes, change config in `app.py` to `configs/local_smolvlm.yaml` and restart.
+
+
 This is **not the assignment deliverable** — it's a hardware-fallback so
 you can demo locally + iterate on the codebase in VSCode while the
 real Kaggle run waits for your kaggle.json + HF_TOKEN.
