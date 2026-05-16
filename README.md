@@ -55,12 +55,22 @@ export ANTHROPIC_API_KEY=...
 
 ### 3. Reproduce everything
 
-**Recommended: Kaggle Notebooks (free T4 GPU)** — see `kaggle/README.md`
-and `kaggle/notebook.ipynb`. The MIMIC-CXR dataset mounts in one click,
-secrets go in the notebook UI, and `configs/kaggle.yaml` is sized for the
-free 16 GB T4.
+**Recommended for laptops without a 16 GB+ GPU: headless Kaggle runs from VSCode.**
+Set up Kaggle credentials once, then everything runs from your terminal:
 
-**Local with a GPU:**
+```bash
+pip install kaggle
+# put kaggle.json in ~/.kaggle/  (Windows: %USERPROFILE%\.kaggle\kaggle.json)
+python scripts/run_on_kaggle.py        # pushes notebook, watches it, downloads outputs
+```
+
+You edit code in VSCode, `git push` to GitHub, then run the script. Kaggle
+clones from GitHub, runs on a free T4, and writes everything back to
+`outputs/`. The Kaggle web UI is only touched once at setup (to attach
+the `HF_TOKEN` and `ANTHROPIC_API_KEY` secrets — see `kaggle/README.md`).
+
+**Local with a GPU (24 GB+):**
+
 
 ```bash
 bash scripts/run.sh                    # Linux/macOS
