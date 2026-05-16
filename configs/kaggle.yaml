@@ -3,8 +3,8 @@
 # session limit and the 16 GB GPU.
 
 paths:
-  data_root:      /kaggle/input/mimic-cxr-dataset
-  images_dir:     /kaggle/working/data/images          # symlinked to /kaggle/input
+  data_root:      /kaggle/input/datasets/simhadrisadaram/mimic-cxr-dataset
+  images_dir:     /kaggle/working/data/images          # unused on this dataset (we keep originals)
   reports_csv:    /kaggle/working/data/reports.csv
   splits_dir:     /kaggle/working/data/splits
   artifacts_dir:  /kaggle/working/artifacts
