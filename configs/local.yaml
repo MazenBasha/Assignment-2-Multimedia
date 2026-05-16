@@ -1,0 +1,80 @@
+# Local-CPU profile. Designed for a laptop with 4 GB VRAM / 16 GB RAM, no
+# Kaggle credentials, no HF gated-model access, no LLM-judge API key.
+#
+# Substitutions vs. the assignment-brief stack:
+#   * Dataset:  Indiana University Open-i CXR (public, no auth) instead of MIMIC-CXR.
+#   * Retriever:  openai/clip-vit-base-patch32 (single-vector cosine) instead of ColPali (MaxSim).
+#   * Generator:  vikhyatk/moondream2 (Apache 2.0) instead of MedGemma-1.5-4b-it (gated).
+#   * VQA build:  rule-based extraction from FINDINGS/IMPRESSION instead of an LLM judge.
+#
+# These substitutions are NOT the assignment deliverable; they let the
+# pipeline run end-to-end on a laptop while the real GPU run waits for
+# credentials. The architecture, prompts, metrics, and split logic are
+# identical, so swapping back to ColPali + MedGemma is a config flip.
+
+paths:
+  data_root:      data/openi
+  images_dir:     data/openi/images
+  reports_csv:    data/openi/reports.csv
+  splits_dir:     data/openi/splits
+  artifacts_dir:  artifacts/local
+  vqa_dataset:    data/openi/vqa/openi_vqa.parquet
+  outputs_dir:    outputs
+
+dataset:
+  test_fraction:           0.1
+  seed:                    42
+  max_train_corpus:        200       # ~2 min CLIP indexing on CPU
+  max_test_examples:       10        # ~5 min total Moondream2 inference on CPU
+  image_short_side:        336
+
+retrieval:
+  backend:        clip               # clip | colpali
+  top_k:          3
+  batch_size:     8
+  use_4bit:       false              # ignored on CPU
+  index_chunk:    64
+  clip_model:     openai/clip-vit-base-patch32
+
+generation:
+  backend:        moondream          # moondream | medgemma
+  device:         cpu
+  use_4bit:       false              # bitsandbytes does not support CPU
+  dtype:          float32            # bf16 -> float32 on CPU
+  moondream_model: vikhyatk/moondream2
+  max_new_tokens:
+    report:       180
+    vqa:          48
+  temperature:    0.2
+  do_sample:      false
+  num_beams:      1
+
+vqa_generation:
+  backend:        rule_based         # rule_based | anthropic | openai | local
+  n_pairs_per_report: 3
+  n_reports_to_use:   60             # only matters for `anthropic`/`openai`
+  human_review_frac:  0.0
+
+models:
+  colpali:        vidore/colpali-v1.3
+  medgemma:       google/medgemma-1.5-4b-it
+  chexbert:       StanfordAIMI/CheXbert
+  bertscore:      microsoft/deberta-large-mnli
+
+eval:
+  bleu_n:          [1, 2, 3, 4]
+  chexpert_labels:
+    - "Atelectasis"
+    - "Cardiomegaly"
+    - "Consolidation"
+    - "Edema"
+    - "Enlarged Cardiomediastinum"
+    - "Fracture"
+    - "Lung Lesion"
+    - "Lung Opacity"
+    - "No Finding"
+    - "Pleural Effusion"
+    - "Pleural Other"
+    - "Pneumonia"
+    - "Pneumothorax"
+    - "Support Devices"

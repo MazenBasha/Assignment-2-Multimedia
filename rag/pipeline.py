@@ -17,12 +17,8 @@ from typing import Optional
 
 from PIL import Image
 
-from generation.medgemma_wrapper import GenConfig, MedGemma, split_prompt_template
-from retrieval.colpali_search import (
-    ColPaliSearcher,
-    Retrieved,
-    format_retrieved_for_prompt,
-)
+from generation.medgemma_wrapper import GenConfig, split_prompt_template
+from retrieval.colpali_search import Retrieved, format_retrieved_for_prompt
 
 
 PROMPTS_DIR = Path("prompts")
@@ -45,12 +41,12 @@ class PipelineConfig:
 class Pipeline:
     def __init__(
         self,
-        generator: MedGemma,
-        searcher: Optional[ColPaliSearcher],
+        generator,                          # MedGemma | Moondream — duck typed
+        searcher,                           # ColPaliSearcher | CLIPSearcher | None
         cfg: PipelineConfig,
     ):
         if cfg.system == "rag" and searcher is None:
-            raise ValueError("system='rag' requires a ColPaliSearcher")
+            raise ValueError("system='rag' requires a searcher")
         self.generator = generator
         self.searcher  = searcher
         self.cfg       = cfg

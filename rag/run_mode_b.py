@@ -19,31 +19,16 @@ import pandas as pd
 from tqdm import tqdm
 
 from data_prep.common import Paths, ensure_dir, get_logger, load_config
-from generation.medgemma_wrapper import GenConfig, MedGemma
+from generation.medgemma_wrapper import GenConfig
+from rag.factory import make_generator, make_searcher
 from rag.pipeline import Pipeline, PipelineConfig
-from retrieval.colpali_search import ColPaliSearcher
 
 log = get_logger("run_mode_b")
 
 
 def _build_pipeline(cfg: dict, paths: Paths, system: str) -> Pipeline:
-    gen = MedGemma(
-        model_name=cfg["models"]["medgemma"],
-        device=cfg["generation"]["device"],
-        use_4bit=cfg["generation"]["use_4bit"],
-    )
-    searcher = None
-    if system == "rag":
-        index_path = paths.artifacts_dir / "colpali_index.pt"
-        if not index_path.exists():
-            raise FileNotFoundError(
-                f"{index_path} not found. Run retrieval.colpali_index first."
-            )
-        searcher = ColPaliSearcher(
-            index_path,
-            device=cfg["generation"]["device"],
-            use_4bit=cfg["retrieval"]["use_4bit"],
-        )
+    gen = make_generator(cfg)
+    searcher = make_searcher(cfg, paths.artifacts_dir) if system == "rag" else None
     pcfg = PipelineConfig(
         system  = system,
         top_k   = cfg["retrieval"]["top_k"],
